@@ -13,18 +13,19 @@ headers = {
 def change_data_structure(data):
     formated_data = []
     for d in data:
-        picture_data = {}
-        picture_data["name_of_artist"] = d.get("author", None)
-        picture_data["title"] = d.get("title", None)
-        picture_data["date or period of creation"] = d.get("date", None)
-        picture_data["dimensions"] = d.get("sizes", None)
-        picture_data["technique"] = d.get("medium", None)
-        picture_data["signature"] = d.get("signature", None)
-        picture_data["provenance"] = d.get("provenance", None)
-        picture_data["bibliography"] = d.get("bibliography", None)
-        picture_data["exhibition"] = d.get("exhibitions", None)
-        picture_data["literature"] = d.get("inscriptions", None)
-        picture_data["image_url"] = d.get("image_url", None)
+        picture_data = {
+            "name_of_artist": d.get("author", None),
+            "title": d.get("title", None),
+            "date or period of creation": d.get("date", None),
+            "dimensions": d.get("sizes", None),
+            "technique": d.get("medium", None),
+            "signature": d.get("signature", None),
+            "provenance": d.get("provenance", None),
+            "bibliography": d.get("bibliography", None),
+            "exhibition": d.get("exhibitions", None),
+            "literature": d.get("inscriptions", None),
+            "image_url": d.get("image_url", None)
+        }
         formated_data.append(picture_data)
     return formated_data
 
@@ -71,8 +72,6 @@ for page in range(1, 17):
             curr_picture_data["image_url"] = "None"
         data.append(curr_picture_data)
 
-for d in data:
-    print(d)
 
 data = change_data_structure(data)
 
