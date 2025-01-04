@@ -31,6 +31,7 @@ def change_data_structure(data):
 
 
 for page in range(1, 17):
+    print(f"I'm on page {page}", flush=True)
     time.sleep(1)
     response = requests.get(f"{joan_miro_url}{page}", headers=headers)
     response.raise_for_status()
