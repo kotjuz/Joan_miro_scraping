@@ -69,6 +69,11 @@ for page in range(1, 17):
         if img_div:
             img_src = img_div.find(name="img")["src"]
             curr_picture_data["image_url"] = f"https://www.fmirobcn.org{img_src}"
+
+            image_response = requests.get(curr_picture_data['image_url'])
+            if image_response.status_code == 200:
+                with open(f"images/{curr_picture_data['title'].replace(' ', '_')}.jpg", 'wb') as img_file:
+                    img_file.write(image_response.content)
         else:
             curr_picture_data["image_url"] = "None"
         data.append(curr_picture_data)
