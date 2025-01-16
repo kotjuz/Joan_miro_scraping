@@ -1,10 +1,11 @@
 from bs4 import BeautifulSoup
 import requests
 import json
-import time
+from requests import RequestException
 
 joan_miro_url = "https://www.fmirobcn.org/en/colection/catalog-works/joan-miro/paintings/page/"
 data = []
+id = 1
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
@@ -14,9 +15,10 @@ def change_data_structure(data):
     formated_data = []
     for d in data:
         picture_data = {
+            "id": d.get("id", None),
             "name_of_artist": d.get("author", None),
             "title": d.get("title", None),
-            "date or period of creation": d.get("date", None),
+            "date": d.get("date", None),
             "dimensions": d.get("sizes", None),
             "technique": d.get("medium", None),
             "signature": d.get("signature", None),
@@ -30,12 +32,22 @@ def change_data_structure(data):
     return formated_data
 
 
+def fetch_html(url, headers):
+    error = True
+    while error:
+        try:
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, "html.parser")
+        except RequestException:
+            pass
+        else:
+            error = False
+    return soup
+
 for page in range(1, 17):
     print(f"I'm on page {page}", flush=True)
-    time.sleep(1)
-    response = requests.get(f"{joan_miro_url}{page}", headers=headers)
-    response.raise_for_status()
-    soup = BeautifulSoup(response.text, "html.parser")
+    soup = fetch_html(f"{joan_miro_url}{page}", headers)
 
 
     paintings_ul = soup.find(name="ul", class_="llistat-obres small-block-grid-2 medium-block-grid-3 large-block-grid-4")
@@ -45,9 +57,8 @@ for page in range(1, 17):
     for href in hrefs:
 
         curr_picture_data = {}
-        time.sleep(0.5)
-        response = requests.get(f"https://www.fmirobcn.org{href}", headers=headers)
-        soup = BeautifulSoup(response.text, "html.parser")
+
+        soup = fetch_html(f"https://www.fmirobcn.org{href}", headers=headers)
 
         description_list = soup.find(name="dl", class_="obra-dades-list")
         try:
@@ -72,16 +83,16 @@ for page in range(1, 17):
 
             image_response = requests.get(curr_picture_data['image_url'])
             if image_response.status_code == 200:
-                with open(f"images/{curr_picture_data['title'].replace(' ', '_').replace('/', '_')}.jpg", 'wb') as img_file:
+                with open(f"images/{id}.jpg", 'wb') as img_file:
                     img_file.write(image_response.content)
         else:
             curr_picture_data["image_url"] = "None"
         data.append(curr_picture_data)
 
-
-data = change_data_structure(data)
-
-with open('miro.json', 'w', encoding='utf-8') as f:
-    json.dump(data, f, indent=4, ensure_ascii=False)
+        curr_picture_data["id"] = id
+        data = change_data_structure(data)
+        id += 1
+        with open('miro.json', 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=4, ensure_ascii=False)
 
 
